@@ -38,6 +38,7 @@ public class EstoqueController {
                         
                         String cor = "Desconhecido";
                         String tamanho = "N/A";
+                        String estoque = "0";
                         
                         for (String detalhe : campos[0].split(";")) {
                             if (detalhe.startsWith("Cor:")) {
@@ -47,7 +48,10 @@ public class EstoqueController {
                             }
                         }
                         
-                        String estoque = campos.length > 1 ? campos[1].trim() : "0";
+                        if (campos.length > 1) {
+                            estoque = campos[1].trim();
+                        }
+                        
                         return new String[]{cor, tamanho, estoque};
                     })
                     .collect(Collectors.toList());
