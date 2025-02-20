@@ -35,9 +35,18 @@ public class EstoqueController {
                     .map(linha -> linha.replaceAll("\"", "").split(";")) // Remove aspas e separa corretamente
                     .map(campos -> {
                         if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
-                        String[] detalhes = campos[0].split(":");
-                        String cor = detalhes.length > 1 ? detalhes[1].split(",")[0].trim() : "Desconhecido";
-                        String tamanho = detalhes.length > 2 ? detalhes[2].trim() : "N/A";
+                        
+                        String cor = "Desconhecido";
+                        String tamanho = "N/A";
+                        
+                        for (String detalhe : campos[0].split(";")) {
+                            if (detalhe.startsWith("Cor:")) {
+                                cor = detalhe.replace("Cor:", "").trim();
+                            } else if (detalhe.startsWith("Tamanho:")) {
+                                tamanho = detalhe.replace("Tamanho:", "").trim();
+                            }
+                        }
+                        
                         String estoque = campos.length > 1 ? campos[1].trim() : "0";
                         return new String[]{cor, tamanho, estoque};
                     })
