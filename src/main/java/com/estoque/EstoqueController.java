@@ -36,11 +36,13 @@ public class EstoqueController {
                     .map(campos -> {
                         if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
 
+                        String descricao = campos[0];
+                        String estoque = campos[1].replace(",", ".").trim(); // Substituir vírgula por ponto para evitar erros numéricos
+
                         String cor = "Desconhecido";
                         String tamanho = "N/A";
-                        String estoque = campos.length > 1 ? campos[1].trim() : "0"; // Garante que o estoque sempre tenha um valor
 
-                        for (String detalhe : campos[0].split(",")) {
+                        for (String detalhe : descricao.split(";")) {
                             if (detalhe.trim().startsWith("Cor:")) {
                                 cor = detalhe.replace("Cor:", "").trim();
                             } else if (detalhe.trim().startsWith("Tamanho:")) {
