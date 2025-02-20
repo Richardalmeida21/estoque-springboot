@@ -13,6 +13,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/estoque")
 public class EstoqueController {
+
+    @GetMapping("/")
+    public String home() {
+        return "API do sistema de estoque está rodando!";
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<?> uploadArquivo(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
