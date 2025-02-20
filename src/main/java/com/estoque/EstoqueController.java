@@ -33,14 +33,14 @@ public class EstoqueController {
             List<String[]> dadosProcessados = linhas.stream()
                     .skip(1) // Ignorar cabeçalho
                     .map(linha -> linha.replaceAll("\"", "").split(";")) // Remove aspas e separa corretamente
-.map(campos -> {
-    String[] detalhes = campos[0].split(":");
-    String cor = detalhes[1].split(",")[0].trim(); // Ajusta o valor da cor
-    String tamanho = detalhes[2].trim(); // Ajusta o tamanho
-    String estoque = campos.length > 1 ? campos[1].trim() : "0"; // Ajusta estoque (evita erro)
-    return new String[]{cor, tamanho, estoque};
-})
-
+                    .map(campos -> {
+                        if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
+                        String[] detalhes = campos[0].split(":");
+                        String cor = detalhes.length > 1 ? detalhes[1].split(",")[0].trim() : "Desconhecido";
+                        String tamanho = detalhes.length > 2 ? detalhes[2].trim() : "N/A";
+                        String estoque = campos.length > 1 ? campos[1].trim() : "0";
+                        return new String[]{cor, tamanho, estoque};
+                    })
                     .collect(Collectors.toList());
             
             return ResponseEntity.ok(dadosProcessados);
