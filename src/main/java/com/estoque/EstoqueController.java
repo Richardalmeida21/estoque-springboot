@@ -4,7 +4,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-import java.io.*;
+
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -44,17 +46,17 @@ public class EstoqueController {
                     .map(linha -> linha.replaceAll("\"", "").split(";")) // Remove aspas e separa corretamente
                     .map(campos -> {
                         // Verifica se o número de colunas é adequado
-                        if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
+                        if (campos.length < 6) return new String[]{"Erro", "Dados inválidos", "0"};
 
-                        String descricao = campos[0];
-                        String estoque = campos[1].replace(",", ".").trim(); // Substitui a vírgula por ponto para valores numéricos
+                        String descricao = campos[1]; // A descrição está na segunda coluna
+                        String estoque = campos[5].replace(",", ".").trim(); // O estoque está na sexta coluna
 
                         // Se o estoque estiver vazio ou inválido, define como 0
                         if (estoque.isEmpty() || !estoque.matches("[0-9]*[.,]?[0-9]+")) {
                             estoque = "0";
                         }
 
-                        // Definição dos valores padrão para cor e tamanho
+                        // Extrai cor e tamanho da descrição
                         String cor = obterDetalhe(descricao, "Cor:");
                         String tamanho = obterDetalhe(descricao, "Tamanho:");
 
@@ -70,9 +72,11 @@ public class EstoqueController {
 
     // Método auxiliar para extrair o detalhe de "Cor:" ou "Tamanho:"
     private String obterDetalhe(String descricao, String chave) {
-        for (String detalhe : descricao.split(";")) {
-            if (detalhe.trim().startsWith(chave)) {
-                return detalhe.replace(chave, "").trim();
+        String[] partes = descricao.split(";");
+        for (String parte : partes) {
+            parte = parte.trim();
+            if (parte.startsWith(chave)) {
+                return parte.substring(chave.length()).trim();
             }
         }
         return "Desconhecido"; // Retorna "Desconhecido" caso não encontre
