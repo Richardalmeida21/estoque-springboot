@@ -32,14 +32,15 @@ public class EstoqueController {
             List<String> linhas = Files.readAllLines(Paths.get(tempFile.getAbsolutePath()));
             List<String[]> dadosProcessados = linhas.stream()
                     .skip(1) // Ignorar cabeçalho
-                    .map(linha -> linha.split(";"))
-                    .map(campos -> {
-                        String[] detalhes = campos[0].split(",?");
-                        String cor = detalhes[0].replace("Cor:", "").trim();
-                        String tamanho = detalhes[1].replace("Tamanho:", "").trim();
-                        String estoque = campos[1].trim();
-                        return new String[]{cor, tamanho, estoque};
-                    })
+                    .map(linha -> linha.replaceAll("\"", "").split(";")) // Remove aspas e separa corretamente
+.map(campos -> {
+    String[] detalhes = campos[0].split(":");
+    String cor = detalhes[1].split(",")[0].trim(); // Ajusta o valor da cor
+    String tamanho = detalhes[2].trim(); // Ajusta o tamanho
+    String estoque = campos.length > 1 ? campos[1].trim() : "0"; // Ajusta estoque (evita erro)
+    return new String[]{cor, tamanho, estoque};
+})
+
                     .collect(Collectors.toList());
             
             return ResponseEntity.ok(dadosProcessados);
