@@ -40,7 +40,7 @@ public class EstoqueController {
                         String tamanho = "N/A";
                         String estoque = campos.length > 1 ? campos[1].trim() : "0"; // Garante que o estoque sempre tenha um valor
 
-                        for (String detalhe : campos[0].split(";")) {
+                        for (String detalhe : campos[0].split(",")) {
                             if (detalhe.trim().startsWith("Cor:")) {
                                 cor = detalhe.replace("Cor:", "").trim();
                             } else if (detalhe.trim().startsWith("Tamanho:")) {
