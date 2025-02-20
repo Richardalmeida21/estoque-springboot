@@ -24,34 +24,34 @@ public class EstoqueController {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Arquivo vazio!");
         }
-        
+
         try {
             File tempFile = File.createTempFile("estoque_", ".csv");
             file.transferTo(tempFile);
-            
+
             List<String> linhas = Files.readAllLines(Paths.get(tempFile.getAbsolutePath()));
             List<String[]> dadosProcessados = linhas.stream()
                     .skip(1) // Ignorar cabeçalho
                     .map(linha -> linha.replaceAll("\"", "").split(";")) // Remove aspas e separa corretamente
                     .map(campos -> {
                         if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
-                        
+
                         String cor = "Desconhecido";
                         String tamanho = "N/A";
-                        String estoque = campos[1].trim(); // O estoque está na segunda coluna
-                        
+                        String estoque = campos.length > 1 ? campos[1].trim() : "0"; // Garante que o estoque sempre tenha um valor
+
                         for (String detalhe : campos[0].split(";")) {
-                            if (detalhe.startsWith("Cor:")) {
+                            if (detalhe.trim().startsWith("Cor:")) {
                                 cor = detalhe.replace("Cor:", "").trim();
-                            } else if (detalhe.startsWith("Tamanho:")) {
+                            } else if (detalhe.trim().startsWith("Tamanho:")) {
                                 tamanho = detalhe.replace("Tamanho:", "").trim();
                             }
                         }
-                        
+
                         return new String[]{cor, tamanho, estoque};
                     })
                     .collect(Collectors.toList());
-            
+
             return ResponseEntity.ok(dadosProcessados);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar arquivo");
