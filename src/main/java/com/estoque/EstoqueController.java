@@ -38,7 +38,7 @@ public class EstoqueController {
                         
                         String cor = "Desconhecido";
                         String tamanho = "N/A";
-                        String estoque = "0";
+                        String estoque = campos[1].trim(); // O estoque está na segunda coluna
                         
                         for (String detalhe : campos[0].split(";")) {
                             if (detalhe.startsWith("Cor:")) {
@@ -46,10 +46,6 @@ public class EstoqueController {
                             } else if (detalhe.startsWith("Tamanho:")) {
                                 tamanho = detalhe.replace("Tamanho:", "").trim();
                             }
-                        }
-                        
-                        if (campos.length > 1) {
-                            estoque = campos[1].trim();
                         }
                         
                         return new String[]{cor, tamanho, estoque};
