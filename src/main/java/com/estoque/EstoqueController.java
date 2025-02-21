@@ -70,8 +70,11 @@ public class EstoqueController {
         }
     }
 
-    // Método auxiliar para extrair o detalhe de "Cor:" ou "Tamanho:"
     private String obterDetalhe(String descricao, String chave) {
+        // Remove as aspas da descrição, se houver
+        descricao = descricao.replaceAll("\"", "");
+
+        // Divide a descrição em partes usando o ponto e vírgula como separador
         String[] partes = descricao.split(";");
         for (String parte : partes) {
             parte = parte.trim();
