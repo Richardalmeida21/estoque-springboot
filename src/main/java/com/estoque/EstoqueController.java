@@ -40,7 +40,7 @@ public class EstoqueController {
         }
     }
 
-    private List<String[]> processarExcel(MultipartFile file) throws IOException {
+    private List<Map<String, String>> processarExcel(MultipartFile file) throws IOException {
         InputStream is = file.getInputStream();
         Workbook workbook;
 
@@ -51,7 +51,7 @@ public class EstoqueController {
         }
 
         Sheet sheet = workbook.getSheetAt(0);
-        List<String[]> dadosProcessados = new ArrayList<>();
+        List<Map<String, String>> dadosProcessados = new ArrayList<>();
 
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
@@ -64,18 +64,20 @@ public class EstoqueController {
             String descricao = cellDescricao.getStringCellValue();
             double estoque = cellEstoque.getNumericCellValue();
 
-            String cor = obterDetalhe(descricao, "Cor:");
-            String tamanho = obterDetalhe(descricao, "Tamanho:");
+            Map<String, String> item = new HashMap<>();
+            item.put("cor", obterDetalhe(descricao, "Cor:"));
+            item.put("tamanho", obterDetalhe(descricao, "Tamanho:"));
+            item.put("estoque", String.valueOf(estoque));
             
-            dadosProcessados.add(new String[]{cor, tamanho, String.valueOf(estoque)});
+            dadosProcessados.add(item);
         }
 
         workbook.close();
         return dadosProcessados;
     }
 
-    private List<String[]> processarCSV(MultipartFile file) throws IOException {
-        List<String[]> dadosProcessados = new ArrayList<>();
+    private List<Map<String, String>> processarCSV(MultipartFile file) throws IOException {
+        List<Map<String, String>> dadosProcessados = new ArrayList<>();
         BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
         
         String linha;
@@ -88,15 +90,16 @@ public class EstoqueController {
             String[] partes = linha.split(";");
             if (partes.length < 2) continue;
 
-            String descricao = partes[0];
+            String descricao = partes[0].replaceAll("\"", "").trim();
             String estoqueStr = partes[1].replace(",", ".").replaceAll("\"", "").trim();
             double estoque = estoqueStr.isEmpty() ? 0.0 : Double.parseDouble(estoqueStr);
 
-
-            String cor = obterDetalhe(descricao, "Cor:");
-            String tamanho = obterDetalhe(descricao, "Tamanho:");
-
-            dadosProcessados.add(new String[]{cor, tamanho, String.valueOf(estoque)});
+            Map<String, String> item = new HashMap<>();
+            item.put("cor", obterDetalhe(descricao, "Cor:"));
+            item.put("tamanho", obterDetalhe(descricao, "Tamanho:"));
+            item.put("estoque", String.valueOf(estoque));
+            
+            dadosProcessados.add(item);
         }
         return dadosProcessados;
     }
@@ -108,7 +111,7 @@ public class EstoqueController {
         int indiceChave = descricao.indexOf(chave);
         if (indiceChave == -1) return "Desconhecido";
         
-        String valor = descricao.substring(indiceChave + chave.length());
+        String valor = descricao.substring(indiceChave + chave.length()).trim();
         int indicePontoEVirgula = valor.indexOf(";");
         if (indicePontoEVirgula != -1) {
             valor = valor.substring(0, indicePontoEVirgula).trim();
