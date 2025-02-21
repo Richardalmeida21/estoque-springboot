@@ -60,13 +60,18 @@ public class EstoqueController {
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
             
-            Cell cellDescricao = row.getCell(0);
-            Cell cellEstoque = row.getCell(1);
+            Cell cellDescricao = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell cellEstoque = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
-            if (cellDescricao == null || cellEstoque == null) continue;
+            String descricao = cellDescricao.toString().trim();
+            String estoqueStr = cellEstoque.toString().replace(",", ".").trim();
             
-            String descricao = cellDescricao.getStringCellValue();
-            double estoque = cellEstoque.getNumericCellValue();
+            double estoque;
+            try {
+                estoque = Double.parseDouble(estoqueStr);
+            } catch (NumberFormatException e) {
+                estoque = 0.0;
+            }
 
             Map<String, String> item = new HashMap<>();
             item.put("cor", obterDetalhe(descricao, "Cor:"));
@@ -96,7 +101,13 @@ public class EstoqueController {
 
             String descricao = partes[0].replaceAll("\"", "").trim();
             String estoqueStr = partes[1].replace(",", ".").replaceAll("\"", "").trim();
-            double estoque = estoqueStr.isEmpty() ? 0.0 : Double.parseDouble(estoqueStr);
+            
+            double estoque;
+            try {
+                estoque = Double.parseDouble(estoqueStr);
+            } catch (NumberFormatException e) {
+                estoque = 0.0;
+            }
 
             Map<String, String> item = new HashMap<>();
             item.put("cor", obterDetalhe(descricao, "Cor:"));
