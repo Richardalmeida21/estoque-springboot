@@ -42,14 +42,14 @@ public class EstoqueController {
 
             // Processa as linhas do arquivo CSV
             List<String[]> dadosProcessados = linhas.stream()
-                    .skip(1) // Ignora o cabeçalho
-                    .map(linha -> linha.replaceAll("\"", "").split(";")) // Remove aspas e separa corretamente
+                    .map(String::trim)  // Replaced lambda with method reference
+                    .map(linha -> linha.split("\t"))  // Divide as colunas usando tabulação (tab)
                     .map(campos -> {
-                        // Verifica se o número de colunas é adequado
+                        // Verifica se a linha tem pelo menos duas colunas (descrição e estoque)
                         if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
 
-                        String descricao = campos[0]; // A descrição está na primeira coluna
-                        String estoque = campos[1].replace(",", ".").trim(); // O estoque está na segunda coluna
+                        String descricao = campos[0];  // A descrição está na primeira coluna
+                        String estoque = campos[1].replace(",", ".").trim();  // O estoque está na segunda coluna
 
                         // Se o estoque estiver vazio ou inválido, define como 0
                         if (estoque.isEmpty() || !estoque.matches("[0-9]*[.,]?[0-9]+")) {
