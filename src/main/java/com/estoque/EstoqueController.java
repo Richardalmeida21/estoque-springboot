@@ -119,21 +119,21 @@ public class EstoqueController {
         return dadosProcessados;
     }
 
-   private String obterDetalhe(String descricao, String chave) {
-        descricao = descricao.replaceAll("\"", "").trim();
-        
-        if (!descricao.contains(chave)) return "Desconhecido";
+  private String obterDetalhe(String descricao, String chave) {
+    descricao = descricao.replaceAll("\"", "").trim();
+    
+    int indiceChave = descricao.indexOf(chave);
+    if (indiceChave == -1) return "Desconhecido";
 
-        int indiceChave = descricao.indexOf(chave);
-        if (indiceChave == -1) return "Desconhecido";
+    String valor = descricao.substring(indiceChave + chave.length()).trim();
 
-        String valor = descricao.substring(indiceChave + chave.length()).trim();
-
-        int fim = valor.indexOf(";");
-        if (fim != -1) {
-            valor = valor.substring(0, fim).trim();
-        }
-
-        return valor.trim();
+    // Procurar o próximo delimitador (; ou fim da string)
+    int fim = valor.indexOf(";");
+    if (fim != -1) {
+        valor = valor.substring(0, fim);
     }
+
+    return valor.trim();
+}
+
 }
