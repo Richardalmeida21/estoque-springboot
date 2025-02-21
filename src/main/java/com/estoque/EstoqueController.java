@@ -7,13 +7,11 @@ import org.springframework.http.HttpStatus;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/estoque")
@@ -31,84 +29,88 @@ public class EstoqueController {
         }
 
         try {
-            // Cria um arquivo temporário para armazenar o conteúdo do arquivo
-            File tempFile = File.createTempFile("estoque_", ".xls");
-            file.transferTo(tempFile);
-
-            // Abre o arquivo Excel
-            FileInputStream fis = new FileInputStream(tempFile);
-            Workbook workbook = new XSSFWorkbook(fis);
-            Sheet sheet = workbook.getSheetAt(0); // Pega a primeira planilha
-
-            // Lista para armazenar os dados processados
-            List<String[]> dadosProcessados = new ArrayList<>();
-
-            // Itera sobre as linhas da planilha
-            Iterator<Row> rowIterator = sheet.iterator();
-            while (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
-
-                // Ignora a primeira linha (cabeçalho)
-                if (row.getRowNum() == 0) {
-                    continue;
-                }
-
-                // Obtém as células da linha
-                Cell cellDescricao = row.getCell(0); // Coluna A (Descrição)
-                Cell cellEstoque = row.getCell(1);  // Coluna B (Estoque físico)
-
-                // Verifica se as células não são nulas
-                if (cellDescricao == null || cellEstoque == null) {
-                    continue;
-                }
-
-                // Extrai os valores das células
-                String descricao = cellDescricao.getStringCellValue();
-                String estoque = String.valueOf(cellEstoque.getNumericCellValue());
-
-                // Extrai cor e tamanho da descrição
-                String cor = obterDetalhe(descricao, "Cor:");
-                String tamanho = obterDetalhe(descricao, "Tamanho:");
-
-                // Adiciona os dados processados à lista
-                dadosProcessados.add(new String[]{cor, tamanho, estoque});
+            String fileName = file.getOriginalFilename();
+            if (fileName != null && fileName.endsWith(".csv")) {
+                return ResponseEntity.ok(processarCSV(file));
+            } else {
+                return ResponseEntity.ok(processarExcel(file));
             }
-
-            // Fecha o workbook e o FileInputStream
-            workbook.close();
-            fis.close();
-
-            return ResponseEntity.ok(dadosProcessados);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar arquivo: " + e.getMessage());
         }
     }
 
-    // Método auxiliar para extrair o detalhe de "Cor:" ou "Tamanho:"
+    private List<String[]> processarExcel(MultipartFile file) throws IOException {
+        InputStream is = file.getInputStream();
+        Workbook workbook;
+
+        if (file.getOriginalFilename().endsWith(".xls")) {
+            workbook = new HSSFWorkbook(is);
+        } else {
+            workbook = new XSSFWorkbook(is);
+        }
+
+        Sheet sheet = workbook.getSheetAt(0);
+        List<String[]> dadosProcessados = new ArrayList<>();
+
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0) continue;
+            
+            Cell cellDescricao = row.getCell(0);
+            Cell cellEstoque = row.getCell(1);
+
+            if (cellDescricao == null || cellEstoque == null) continue;
+            
+            String descricao = cellDescricao.getStringCellValue();
+            double estoque = cellEstoque.getNumericCellValue();
+
+            String cor = obterDetalhe(descricao, "Cor:");
+            String tamanho = obterDetalhe(descricao, "Tamanho:");
+            
+            dadosProcessados.add(new String[]{cor, tamanho, String.valueOf(estoque)});
+        }
+
+        workbook.close();
+        return dadosProcessados;
+    }
+
+    private List<String[]> processarCSV(MultipartFile file) throws IOException {
+        List<String[]> dadosProcessados = new ArrayList<>();
+        BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+        
+        String linha;
+        boolean primeiraLinha = true;
+        while ((linha = br.readLine()) != null) {
+            if (primeiraLinha) { 
+                primeiraLinha = false;
+                continue;
+            }
+            String[] partes = linha.split(";");
+            if (partes.length < 2) continue;
+
+            String descricao = partes[0];
+            double estoque = Double.parseDouble(partes[1].replace(",", "."));
+
+            String cor = obterDetalhe(descricao, "Cor:");
+            String tamanho = obterDetalhe(descricao, "Tamanho:");
+
+            dadosProcessados.add(new String[]{cor, tamanho, String.valueOf(estoque)});
+        }
+        return dadosProcessados;
+    }
+
     private String obterDetalhe(String descricao, String chave) {
-        // Remove as aspas da descrição, se houver
         descricao = descricao.replaceAll("\"", "");
-
-        // Verifica se a chave existe na descrição
-        if (!descricao.contains(chave)) {
-            return "Desconhecido"; // Retorna "Desconhecido" se a chave não for encontrada
-        }
-
-        // Procura pela chave na descrição
+        if (!descricao.contains(chave)) return "Desconhecido";
+        
         int indiceChave = descricao.indexOf(chave);
-        if (indiceChave == -1) {
-            return "Desconhecido"; // Retorna "Desconhecido" se a chave não for encontrada
-        }
-
-        // Extrai o valor após a chave
+        if (indiceChave == -1) return "Desconhecido";
+        
         String valor = descricao.substring(indiceChave + chave.length());
-
-        // Remove qualquer texto após o próximo ponto e vírgula (;)
         int indicePontoEVirgula = valor.indexOf(";");
         if (indicePontoEVirgula != -1) {
             valor = valor.substring(0, indicePontoEVirgula).trim();
         }
-
-        return valor.trim(); // Retorna o valor extraído
+        return valor.trim();
     }
 }
