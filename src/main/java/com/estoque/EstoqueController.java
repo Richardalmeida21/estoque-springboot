@@ -42,7 +42,7 @@ public class EstoqueController {
 
             // Processa as linhas do arquivo CSV
             List<String[]> dadosProcessados = linhas.stream()
-                    .map(String::trim)  // Replaced lambda with method reference
+                    .map(String::trim)  // Remove espaços extras de cada linha
                     .map(linha -> linha.split("\t"))  // Divide as colunas usando tabulação (tab)
                     .map(campos -> {
                         // Verifica se a linha tem pelo menos duas colunas (descrição e estoque)
