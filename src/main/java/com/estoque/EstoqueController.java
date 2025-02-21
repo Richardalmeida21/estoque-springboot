@@ -46,10 +46,10 @@ public class EstoqueController {
                     .map(linha -> linha.replaceAll("\"", "").split(";")) // Remove aspas e separa corretamente
                     .map(campos -> {
                         // Verifica se o número de colunas é adequado
-                        if (campos.length < 6) return new String[]{"Erro", "Dados inválidos", "0"};
+                        if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
 
-                        String descricao = campos[1]; // A descrição está na segunda coluna
-                        String estoque = campos[5].replace(",", ".").trim(); // O estoque está na sexta coluna
+                        String descricao = campos[0]; // A descrição está na primeira coluna
+                        String estoque = campos[1].replace(",", ".").trim(); // O estoque está na segunda coluna
 
                         // Se o estoque estiver vazio ou inválido, define como 0
                         if (estoque.isEmpty() || !estoque.matches("[0-9]*[.,]?[0-9]+")) {
@@ -76,6 +76,7 @@ public class EstoqueController {
         }
     }
 
+    // Método auxiliar para extrair o detalhe de "Cor:" ou "Tamanho:"
     private String obterDetalhe(String descricao, String chave) {
         // Remove as aspas da descrição, se houver
         descricao = descricao.replaceAll("\"", "");
@@ -102,5 +103,4 @@ public class EstoqueController {
 
         return valor.trim(); // Retorna o valor extraído
     }
-
 }
