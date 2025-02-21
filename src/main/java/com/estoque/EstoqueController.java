@@ -71,17 +71,22 @@ public class EstoqueController {
     }
 
     private String obterDetalhe(String descricao, String chave) {
-        // Remove as aspas da descrição, se houver
         descricao = descricao.replaceAll("\"", "");
+        System.out.println("Processando descrição: " + descricao + " com chave: " + chave);
 
-        // Divide a descrição em partes usando o ponto e vírgula como separador
-        String[] partes = descricao.split(";");
-        for (String parte : partes) {
-            parte = parte.trim();
-            if (parte.startsWith(chave)) {
-                return parte.substring(chave.length()).trim();
-            }
+        int indiceChave = descricao.indexOf(chave);
+        if (indiceChave == -1) {
+            System.out.println("Chave não encontrada: " + chave);
+            return "Desconhecido";
         }
-        return "Desconhecido"; // Retorna "Desconhecido" caso não encontre
+
+        String valor = descricao.substring(indiceChave + chave.length());
+        int indicePontoEVirgula = valor.indexOf(";");
+        if (indicePontoEVirgula != -1) {
+            valor = valor.substring(0, indicePontoEVirgula).trim();
+        }
+
+        System.out.println("Valor extraído: " + valor);
+        return valor.trim();
     }
 }
