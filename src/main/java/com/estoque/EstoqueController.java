@@ -60,6 +60,12 @@ public class EstoqueController {
                         String cor = obterDetalhe(descricao, "Cor:");
                         String tamanho = obterDetalhe(descricao, "Tamanho:");
 
+                        // Logs para depuração
+                        System.out.println("Descrição: " + descricao);
+                        System.out.println("Cor extraída: " + cor);
+                        System.out.println("Tamanho extraído: " + tamanho);
+                        System.out.println("-----------------------------");
+
                         return new String[]{cor, tamanho, estoque};
                     })
                     .collect(Collectors.toList());
@@ -91,4 +97,5 @@ public class EstoqueController {
 
         return valor.trim(); // Retorna o valor extraído
     }
+
 }
