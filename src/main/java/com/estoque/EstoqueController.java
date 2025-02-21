@@ -10,7 +10,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/produtos")
-public class ProdutoController {
+public class EstoqueController {
 
     @PostMapping("/upload")
     public List<Map<String, String>> uploadCSV(@RequestParam("file") MultipartFile file) {
