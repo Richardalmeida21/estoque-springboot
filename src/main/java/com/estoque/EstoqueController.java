@@ -24,17 +24,35 @@ public class EstoqueController {
             System.out.println("Arquivo recebido: " + file.getOriginalFilename());
 
             CSVParser csvParser = CSVFormat.DEFAULT
-                .withDelimiter(';')
+                .withDelimiter(';') // Teste com ',' se necessário
                 .withFirstRecordAsHeader()
                 .withIgnoreSurroundingSpaces()
                 .parse(reader);
+
+            // Exibir cabeçalhos detectados para depuração
+            System.out.println("Cabeçalhos encontrados:");
+            for (String header : csvParser.getHeaderMap().keySet()) {
+                System.out.println("'" + header + "'");
+            }
 
             for (CSVRecord record : csvParser) {
                 Map<String, String> produto = new HashMap<>();
 
                 try {
-                    String descricao = record.get("Descrição").trim();
-                    String estoque = record.get("Estoque").trim();
+                    // Captura os nomes exatos dos cabeçalhos
+                    String descricaoHeader = csvParser.getHeaderMap().keySet().stream()
+                        .filter(h -> h.trim().equalsIgnoreCase("Descrição"))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Coluna 'Descrição' não encontrada!"));
+
+                    String estoqueHeader = csvParser.getHeaderMap().keySet().stream()
+                        .filter(h -> h.trim().equalsIgnoreCase("Estoque"))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Coluna 'Estoque' não encontrada!"));
+
+                    // Obtém os valores das colunas
+                    String descricao = record.get(descricaoHeader).trim();
+                    String estoque = record.get(estoqueHeader).trim();
 
                     produto.put("descricao", descricao);
                     produto.put("estoque", estoque);
