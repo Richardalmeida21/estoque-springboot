@@ -5,12 +5,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/estoque")
@@ -29,46 +32,51 @@ public class EstoqueController {
 
         try {
             // Cria um arquivo temporário para armazenar o conteúdo do arquivo
-            File tempFile = File.createTempFile("estoque_", ".csv");
+            File tempFile = File.createTempFile("estoque_", ".xls");
             file.transferTo(tempFile);
 
-            // Lê todas as linhas do arquivo CSV
-            List<String> linhas = Files.readAllLines(Paths.get(tempFile.getAbsolutePath()));
+            // Abre o arquivo Excel
+            FileInputStream fis = new FileInputStream(tempFile);
+            Workbook workbook = new XSSFWorkbook(fis);
+            Sheet sheet = workbook.getSheetAt(0); // Pega a primeira planilha
 
-            // Verifica se o arquivo tem pelo menos uma linha além do cabeçalho
-            if (linhas.size() <= 1) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Arquivo sem dados!");
+            // Lista para armazenar os dados processados
+            List<String[]> dadosProcessados = new ArrayList<>();
+
+            // Itera sobre as linhas da planilha
+            Iterator<Row> rowIterator = sheet.iterator();
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+
+                // Ignora a primeira linha (cabeçalho)
+                if (row.getRowNum() == 0) {
+                    continue;
+                }
+
+                // Obtém as células da linha
+                Cell cellDescricao = row.getCell(0); // Coluna A (Descrição)
+                Cell cellEstoque = row.getCell(1);  // Coluna B (Estoque físico)
+
+                // Verifica se as células não são nulas
+                if (cellDescricao == null || cellEstoque == null) {
+                    continue;
+                }
+
+                // Extrai os valores das células
+                String descricao = cellDescricao.getStringCellValue();
+                String estoque = String.valueOf(cellEstoque.getNumericCellValue());
+
+                // Extrai cor e tamanho da descrição
+                String cor = obterDetalhe(descricao, "Cor:");
+                String tamanho = obterDetalhe(descricao, "Tamanho:");
+
+                // Adiciona os dados processados à lista
+                dadosProcessados.add(new String[]{cor, tamanho, estoque});
             }
 
-            // Processa as linhas do arquivo CSV
-            List<String[]> dadosProcessados = linhas.stream()
-                    .map(String::trim)  // Remove espaços extras de cada linha
-                    .map(linha -> linha.split("\t"))  // Divide as colunas usando tabulação (tab)
-                    .map(campos -> {
-                        // Verifica se a linha tem pelo menos duas colunas (descrição e estoque)
-                        if (campos.length < 2) return new String[]{"Erro", "Dados inválidos", "0"};
-
-                        String descricao = campos[0];  // A descrição está na primeira coluna
-                        String estoque = campos[1].replace(",", ".").trim();  // O estoque está na segunda coluna
-
-                        // Se o estoque estiver vazio ou inválido, define como 0
-                        if (estoque.isEmpty() || !estoque.matches("[0-9]*[.,]?[0-9]+")) {
-                            estoque = "0";
-                        }
-
-                        // Extrai cor e tamanho da descrição
-                        String cor = obterDetalhe(descricao, "Cor:");
-                        String tamanho = obterDetalhe(descricao, "Tamanho:");
-
-                        // Logs para depuração
-                        System.out.println("Descrição: " + descricao);
-                        System.out.println("Cor extraída: " + cor);
-                        System.out.println("Tamanho extraído: " + tamanho);
-                        System.out.println("-----------------------------");
-
-                        return new String[]{cor, tamanho, estoque};
-                    })
-                    .collect(Collectors.toList());
+            // Fecha o workbook e o FileInputStream
+            workbook.close();
+            fis.close();
 
             return ResponseEntity.ok(dadosProcessados);
         } catch (IOException e) {
