@@ -76,8 +76,7 @@ public class EstoqueController {
             }
 
             Map<String, String> item = new HashMap<>();
-            item.put("cor", obterDetalhe(descricao, "Cor:"));
-            item.put("tamanho", obterDetalhe(descricao, "Tamanho:"));
+            item.put("descricao", descricao);
             item.put("estoque", String.valueOf(estoque));
             
             dadosProcessados.add(item);
@@ -114,26 +113,11 @@ public class EstoqueController {
             }
 
             Map<String, String> item = new HashMap<>();
-            item.put("cor", obterDetalhe(descricao, "Cor:"));
-            item.put("tamanho", obterDetalhe(descricao, "Tamanho:"));
+            item.put("descricao", descricao);
             item.put("estoque", String.valueOf(estoque));
             
             dadosProcessados.add(item);
         }
         return dadosProcessados;
-    }
-
-    private String obterDetalhe(String descricao, String chave) {
-        descricao = descricao.replaceAll("\"", "").trim();
-        
-        int indiceChave = descricao.indexOf(chave);
-        if (indiceChave == -1) return "Desconhecido";
-
-        String valor = descricao.substring(indiceChave + chave.length()).trim();
-
-        // Capturar o primeiro espaço, ponto e vírgula ou fim da string
-        String[] partes = valor.split("[;\s]", 2);
-        
-        return partes[0].trim();
     }
 }
