@@ -120,20 +120,20 @@ public class EstoqueController {
     }
 
    private String obterDetalhe(String descricao, String chave) {
-    descricao = descricao.replaceAll("\"", "").trim();
-    
-    if (!descricao.contains(chave)) return "Desconhecido";
+        descricao = descricao.replaceAll("\"", "").trim();
+        
+        if (!descricao.contains(chave)) return "Desconhecido";
 
-    int indiceChave = descricao.indexOf(chave);
-    if (indiceChave == -1) return "Desconhecido";
+        int indiceChave = descricao.indexOf(chave);
+        if (indiceChave == -1) return "Desconhecido";
 
-    String valor = descricao.substring(indiceChave + chave.length()).trim();
+        String valor = descricao.substring(indiceChave + chave.length()).trim();
 
-    // Busca por espaços ou caracteres delimitadores para extrair apenas o valor
-    int fim = valor.indexOf(" ");
-    if (fim == -1) fim = valor.length();
+        int fim = valor.indexOf(";");
+        if (fim != -1) {
+            valor = valor.substring(0, fim).trim();
+        }
 
-    return valor.substring(0, fim).trim();
-}
-
+        return valor.trim();
+    }
 }
