@@ -80,6 +80,11 @@ public class EstoqueController {
         // Remove as aspas da descrição, se houver
         descricao = descricao.replaceAll("\"", "");
 
+        // Verifica se a chave existe na descrição
+        if (!descricao.contains(chave)) {
+            return "Desconhecido"; // Retorna "Desconhecido" se a chave não for encontrada
+        }
+
         // Procura pela chave na descrição
         int indiceChave = descricao.indexOf(chave);
         if (indiceChave == -1) {
