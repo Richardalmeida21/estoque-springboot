@@ -59,18 +59,30 @@ public class EstoqueController {
 
         for (Row row : sheet) {
             if (row.getRowNum() == 0) continue;
-            
+
             Cell cellDescricao = row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-            Cell cellEstoque = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell cellTamanho = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell cellCor = row.getCell(2, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+            Cell cellEstoque = row.getCell(3, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
             String descricao = cellDescricao.toString().trim();
+            String tamanho = cellTamanho.toString().trim();
+            String cor = cellCor.toString().trim();
+
+            // Concatena tamanho e cor na descrição
+            if (!tamanho.isEmpty() && !cor.isEmpty()) {
+                descricao += " - Tamanho: " + tamanho + " - Cor: " + cor;
+            }
+
             logger.info("Descrição lida: " + descricao);
-            
+
             String estoqueStr = cellEstoque.toString().replace(",", ".").trim();
-            
-            double estoque;
+            double estoque = 0.0;
+
             try {
-                estoque = Double.parseDouble(estoqueStr);
+                if (!estoqueStr.isEmpty()) {
+                    estoque = Double.parseDouble(estoqueStr);
+                }
             } catch (NumberFormatException e) {
                 estoque = 0.0;
             }
@@ -78,7 +90,7 @@ public class EstoqueController {
             Map<String, String> item = new HashMap<>();
             item.put("descricao", descricao);
             item.put("estoque", String.valueOf(estoque));
-            
+
             dadosProcessados.add(item);
         }
 
@@ -89,25 +101,36 @@ public class EstoqueController {
     private List<Map<String, String>> processarCSV(MultipartFile file) throws IOException {
         List<Map<String, String>> dadosProcessados = new ArrayList<>();
         BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-        
+
         String linha;
         boolean primeiraLinha = true;
         while ((linha = br.readLine()) != null) {
-            if (primeiraLinha) { 
+            if (primeiraLinha) {
                 primeiraLinha = false;
                 continue;
             }
             String[] partes = linha.split(";");
-            if (partes.length < 2) continue;
+
+            if (partes.length < 4) continue; // Garante que todas as colunas esperadas existem
 
             String descricao = partes[0].replaceAll("\"", "").trim();
+            String tamanho = partes[1].replaceAll("\"", "").trim();
+            String cor = partes[2].replaceAll("\"", "").trim();
+
+            // Concatena tamanho e cor na descrição
+            if (!tamanho.isEmpty() && !cor.isEmpty()) {
+                descricao += " - Tamanho: " + tamanho + " - Cor: " + cor;
+            }
+
             logger.info("Descrição lida: " + descricao);
-            
-            String estoqueStr = partes[1].replace(",", ".").replaceAll("\"", "").trim();
-            
-            double estoque;
+
+            String estoqueStr = partes[3].replace(",", ".").replaceAll("\"", "").trim();
+            double estoque = 0.0;
+
             try {
-                estoque = Double.parseDouble(estoqueStr);
+                if (!estoqueStr.isEmpty()) {
+                    estoque = Double.parseDouble(estoqueStr);
+                }
             } catch (NumberFormatException e) {
                 estoque = 0.0;
             }
@@ -115,7 +138,7 @@ public class EstoqueController {
             Map<String, String> item = new HashMap<>();
             item.put("descricao", descricao);
             item.put("estoque", String.valueOf(estoque));
-            
+
             dadosProcessados.add(item);
         }
         return dadosProcessados;
