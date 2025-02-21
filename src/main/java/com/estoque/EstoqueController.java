@@ -89,7 +89,9 @@ public class EstoqueController {
             if (partes.length < 2) continue;
 
             String descricao = partes[0];
-            double estoque = Double.parseDouble(partes[1].replace(",", "."));
+            String estoqueStr = partes[1].replace(",", ".").replaceAll("\"", "").trim();
+            double estoque = estoqueStr.isEmpty() ? 0.0 : Double.parseDouble(estoqueStr);
+
 
             String cor = obterDetalhe(descricao, "Cor:");
             String tamanho = obterDetalhe(descricao, "Tamanho:");
