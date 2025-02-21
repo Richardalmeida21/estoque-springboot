@@ -4,11 +4,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -70,7 +68,7 @@ public class EstoqueController {
             
             double estoque;
             try {
-                estoque = estoqueStr.isEmpty() ? 0.0 : Double.parseDouble(estoqueStr);
+                estoque = Double.parseDouble(estoqueStr);
             } catch (NumberFormatException e) {
                 estoque = 0.0;
             }
@@ -107,7 +105,7 @@ public class EstoqueController {
             
             double estoque;
             try {
-                estoque = estoqueStr.isEmpty() ? 0.0 : Double.parseDouble(estoqueStr);
+                estoque = Double.parseDouble(estoqueStr);
             } catch (NumberFormatException e) {
                 estoque = 0.0;
             }
