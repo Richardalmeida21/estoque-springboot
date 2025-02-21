@@ -64,6 +64,8 @@ public class EstoqueController {
             Cell cellEstoque = row.getCell(1, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
             String descricao = cellDescricao.toString().trim();
+            logger.info("Descrição lida: " + descricao);
+            
             String estoqueStr = cellEstoque.toString().replace(",", ".").trim();
             
             double estoque;
@@ -100,6 +102,8 @@ public class EstoqueController {
             if (partes.length < 2) continue;
 
             String descricao = partes[0].replaceAll("\"", "").trim();
+            logger.info("Descrição lida: " + descricao);
+            
             String estoqueStr = partes[1].replace(",", ".").replaceAll("\"", "").trim();
             
             double estoque;
@@ -119,21 +123,17 @@ public class EstoqueController {
         return dadosProcessados;
     }
 
-  private String obterDetalhe(String descricao, String chave) {
-    descricao = descricao.replaceAll("\"", "").trim();
-    
-    int indiceChave = descricao.indexOf(chave);
-    if (indiceChave == -1) return "Desconhecido";
+    private String obterDetalhe(String descricao, String chave) {
+        descricao = descricao.replaceAll("\"", "").trim();
+        
+        int indiceChave = descricao.indexOf(chave);
+        if (indiceChave == -1) return "Desconhecido";
 
-    String valor = descricao.substring(indiceChave + chave.length()).trim();
+        String valor = descricao.substring(indiceChave + chave.length()).trim();
 
-    // Procurar o próximo delimitador (; ou fim da string)
-    int fim = valor.indexOf(";");
-    if (fim != -1) {
-        valor = valor.substring(0, fim);
+        // Capturar o primeiro espaço, ponto e vírgula ou fim da string
+        String[] partes = valor.split("[;\s]", 2);
+        
+        return partes[0].trim();
     }
-
-    return valor.trim();
-}
-
 }
