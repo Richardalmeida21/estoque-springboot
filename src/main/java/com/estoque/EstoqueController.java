@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/produtos")
+@RequestMapping("/api/estoque")
 public class EstoqueController {
 
     @PostMapping("/upload")
