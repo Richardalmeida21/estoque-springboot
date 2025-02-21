@@ -12,10 +12,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/estoque")
 public class EstoqueController {
+
+    private static final Logger logger = Logger.getLogger(EstoqueController.class.getName());
 
     @GetMapping("/")
     public String home() {
@@ -35,8 +38,9 @@ public class EstoqueController {
             } else {
                 return ResponseEntity.ok(processarExcel(file));
             }
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar arquivo: " + e.getMessage());
+        } catch (Exception e) {
+            logger.severe("Erro ao processar arquivo: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro interno: " + e.getMessage());
         }
     }
 
