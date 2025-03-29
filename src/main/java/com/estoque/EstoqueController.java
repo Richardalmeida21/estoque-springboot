@@ -10,7 +10,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/estoque")
-@CrossOrigin(origins = "*") // Permite que qualquer frontend acesse esta API
 public class EstoqueController {
 
     @PostMapping("/upload")
