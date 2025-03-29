@@ -14,9 +14,10 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("*") // Permitir qualquer origem (troque pelo seu domínio se precisar)
+                        .allowedOrigins("https://estoque-frontend.vercel.app") // Coloque o domínio do frontend aqui
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true); // Permite o envio de credenciais (cookies, autenticação)
             }
         };
     }
