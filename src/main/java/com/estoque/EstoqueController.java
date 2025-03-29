@@ -12,6 +12,11 @@ import java.util.*;
 @RequestMapping("/api/estoque")
 public class EstoqueController {
 
+     @GetMapping("/keep-alive")
+    public ResponseEntity<String> keepAlive() {
+        return ResponseEntity.ok("API está ativa");
+    }
+
     @PostMapping("/upload")
     public List<Map<String, String>> uploadCSV(@RequestParam("file") MultipartFile file) {
         List<Map<String, String>> produtos = new ArrayList<>();
