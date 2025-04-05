@@ -14,9 +14,11 @@ import java.util.*;
 public class EstoqueController {
 
      @GetMapping("/keep-alive")
-    public ResponseEntity<String> keepAlive() {
-        return ResponseEntity.ok("API está ativa");
-    }
+public ResponseEntity<String> keepAlive() {
+    System.out.println("[KEEP-ALIVE] Ping recebido em: " + new Date());
+    return ResponseEntity.ok("OK");
+}
+
 
     @PostMapping("/upload")
     public List<Map<String, String>> uploadCSV(@RequestParam("file") MultipartFile file) {
